@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Банковская карта</title>
+
+  <style>
+    body {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 16px;
+      font-family: Arial, sans-serif;
+    }
+
+    .layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    form {
+      display: grid;
+      gap: 12px;
+      width: 300px;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+    }
+    input,
+    select,
+    button {
+      padding: 8px;
+      font: inherit;
+    }
+    .bank-card {
+      position: relative;
+      box-sizing: border-box;
+      width: 320px;
+      height: 200px;
+      padding: 20px;
+      border-radius: 16px;
+      color: white;
+      background: linear-gradient(135deg, #174a7e, #138c91);
+      box-shadow: 0 4px 12px #0003;
+    }
+    .card-bank {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .card-system {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-weight: bold;
+    }
+    .card-number {
+      margin-top: 38px;
+      font-size: 20px;
+      letter-spacing: 2px;
+    }
+    .card-bottom {
+      position: absolute;
+  right: 20px;
+     bottom: 20px;
+     left: 20px;
+     display: flex;
+     justify-content: space-between;
+     gap: 12px;
+      font-size: 13px;
+     text-transform: uppercase;
+    }
+    table {
+      width: 100%;
+      margin-top: 24px;
+      border-collapse: collapse;
+    }
+    th,
+    td {
+      padding: 8px;
+      border: 1px solid #aaa;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Информация о карте</h1>
+
+  <div class="layout">
+    <form id="cardForm">
+      <label>
+        Название банка
+         <input id="bank" type="text" required>
+          </label>
+
+       <label>
+        Платёжная система
+        <select id="system" required>
+          <option value="">Выберите систему</option>
+          <option value="Visa">Visa</option>
+          <option value="Mastercard">Mastercard</option>
+          <option value="МИР">МИР</option>
+        </select>
+      </label>
+
+      <label>
+        Номер карты
+        <input
+          id="number"
+          type="text"
+          inputmode="numeric"
+          maxlength="19"
+          placeholder="1234 5678 9012 3456"
+          required
+        >
+      </label>
+
+      <label>
+        Имя держателя карты
+        <input id="holder" type="text" required>
+      </label>
+
+      <label>
+        Месяц окончания
+        <select id="month" required>
+          <option value="">Месяц</option>
+        </select>
+      </label>
+
+      <label>
+        Год окончания
+        <select id="year" required>
+          <option value="">Год</option>
+        </select>
+      </label>
+
+      <button type="submit">Добавить карту в таблицу</button>
+    </form>
+
+    <div class="bank-card">
+      <div class="card-bank" id="previewBank">Название банка</div>
+      <div class="card-system" id="previewSystem">ПЛАТЁЖНАЯ СИСТЕМА</div>
+      <div class="card-number" id="previewNumber">•••• •••• •••• ••••</div>
+
+      <div class="card-bottom">
+        <span id="previewHolder">ИМЯ ДЕРЖАТЕЛЯ</span>
+        <span id="previewExpiry">ММ/ГГГГ</span>
+      </div>
+      </div>
+      </div>
+
+  <h2>Добавленные карты</h2>
+
+    <table>
+    <thead>
+      <tr>
+        <th>Банк</th>
+        <th>Платёжная система</th>
+        <th>Номер карты</th>
+        <th>Держатель</th>
+        <th>Окончание</th>
+      </tr>
+     </thead>
+    <tbody id="cardTable"></tbody>
+    </table>
+   <script>
+    const form = document.getElementById("cardForm");
+    const numberInput = document.getElementById("number");
+    const monthSelect = document.getElementById("month");
+    const yearSelect = document.getElementById("year");
+
+    for (let month = 1; month <= 12; month++) {
+      const option = document.createElement("option");
+      option.value = String(month).padStart(2, "0");
+      option.textContent = String(month).padStart(2, "0");
+      monthSelect.appendChild(option);
+    }
+
+    const currentYear = new Date().getFullYear();
+
+    for (let year = currentYear; year <= currentYear + 10; year++) {
+      const option = document.createElement("option");
+      option.value = year;
+      option.textContent = year;
+      yearSelect.appendChild(option);
+    }
+
+    function updatePreview() {
+      document.getElementById("previewBank").textContent =
+        document.getElementById("bank").value || "Название банка";
+
+      document.getElementById("previewSystem").textContent =
+        document.getElementById("system").value || "ПЛАТЁЖНАЯ СИСТЕМА";
+
+      const digits = numberInput.value.replace(/\D/g, "").slice(0, 16);
+      numberInput.value = digits.replace(/(\d{4})(?=\d)/g, "$1 ");
+
+      document.getElementById("previewNumber").textContent =
+        numberInput.value || "•••• •••• •••• ••••";
+
+      document.getElementById("previewHolder").textContent =
+        document.getElementById("holder").value.toUpperCase() ||
+        "ИМЯ ДЕРЖАТЕЛЯ";
+      const month = monthSelect.value;
+      const year = yearSelect.value;
+      document.getElementById("previewExpiry").textContent =
+        month && year ? `${month}/${year}` : "ММ/ГГГГ";
+    }
+    form.addEventListener("input", updatePreview);
+    form.addEventListener("change", updatePreview);
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+      const digits = numberInput.value.replace(/\D/g, "");
+
+      if (digits.length !== 16) {
+        alert("Номер карты должен содержать 16 цифр.");
+        return;
+      }
+      const row = document.createElement("tr");
+      const values = [
+        document.getElementById("bank").value,
+        document.getElementById("system").value,
+        numberInput.value,
+        document.getElementById("holder").value,
+        `${monthSelect.value}/${yearSelect.value}`
+      ];
+      values.forEach(function(value) {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+
+      document.getElementById("cardTable").appendChild(row);
+
+      form.reset();
+      updatePreview();
+    });
+
+    updatePreview();
+  </script>
+</body>
+</html>
